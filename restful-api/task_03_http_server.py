@@ -1,40 +1,63 @@
 #!/usr/bin/python3
+"""Simple HTTP server using http.server module."""
 
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
 
 class RequestHandler(BaseHTTPRequestHandler):
+    """Custom HTTP request handler for simple API endpoints."""
+
     def do_GET(self):
-        if self.path = '/info':
-            dic = {
+        """Handle GET requests for defined endpoints."""
+        if self.path == "/":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Hello, this is a simple API!")
+
+        elif self.path == "/data":
+            payload = {"name": "John", "age": 30, "city": "New York"}
+            json_bytes = json.dumps(payload).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json_bytes)
+
+        elif self.path == "/status":
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"OK")
+
+        elif self.path == "/info":
+            payload = {
                 "version": "1.0",
-                "description": "A simple API built with http.server"
+                "description": "A simple API built with http.server",
             }
-            data = json.dumps(dic)
+            json_bytes = json.dumps(payload).encode("utf-8")
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
-            self.end_header("Content-lenght", str(len(data)))
-            self.wfile.write(data)
-        elif self.path = '/data':
-            dic = {
-                "name": "Jhon",
-                "age":30,
-                "city": "New York"
-            }
-            data = json.dumps(dic)
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self.send_header("Content-lenght", str(len(data)))
-            self.wfile.write(data)
+            self.end_headers()
+            self.wfile.write(json_bytes)
+
         else:
-                error_payload = {"error": "Endpoint not found", "path": self.path}
-                json_bytes = json.dumps(error_payload)
-                self.send_response(404)
-                self.send_header("Content-Type", "application/json")
-                self.send_header("Content-Length", str(len(json_bytes)))
-                self.end_headers()
+            self.send_response(404)
+            self.send_header("Content-Type", "text/plain")
+            self.end_headers()
+            self.wfile.write(b"Endpoint not found")
 
 
+def run(host="localhost", port=8000):
+    """Start the HTTP server on specified host and port."""
+    server = HTTPServer((host, port), RequestHandler)
+    print(f"Servidor corriendo en http://{host}:{port}/")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print("\nServidor detenido.")
+        server.server_close()
 
 
-
+if __name__ == "__main__":
+    run()
