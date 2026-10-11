@@ -68,7 +68,7 @@ def jwt_protected():
 
 
 @app.route("/admin-only", methods=["GET"])
-@jwt_required
+@jwt_required()
 def admin():
     claims = get_jwt()
     if claims.get("role") != "admin":
